@@ -4,6 +4,7 @@ using Microsoft.VisualBasic.ApplicationServices;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Omnipop.Entities;
 using SharpDX.Direct2D1;
 using SharpDX.Direct3D9;
 using System;
@@ -23,7 +24,7 @@ namespace HPScreen
         private int loadFrames = 0;
         private const int LOAD_FRAMES_THRESH = 10;
         Effect circleCropEffect;
-        protected List<string> headimages = new List<string>();
+        protected List<Head> headimages = new List<Head>();
 
         protected bool RunSetup { get; set; }
         public ScreenSaver()
@@ -83,8 +84,16 @@ namespace HPScreen
 
         protected void Setup()
         {
-            headimages.Add("cam");
-            headimages.Add("jacob");
+            headimages.Add(new Head("cam", 200));
+            headimages.Add(new Head("jacob", 100));
+
+            foreach (Head head in headimages)
+            {
+                head.SetPosition(
+                    Ran.Current.Next(100, Graphics.Current.ScreenWidth - 200),
+                    Ran.Current.Next(100, Graphics.Current.ScreenHeight - 200));
+            }
+
             RunSetup = false;
         }
 
@@ -126,15 +135,18 @@ namespace HPScreen
                 }
             }
         }
+        protected void InitHeads()
+        {
 
+        }
         protected void DrawHeads()
         {
             Graphics.Current.SpriteB.Begin(effect: circleCropEffect);
-            int size = 140;
             for (int i = 0; i < headimages.Count; i++)
             {
-                Rectangle rect = new Rectangle((int)(i * (size*1.5f)), 0, size, size);
-                Graphics.Current.SpriteB.Draw(Graphics.Current.SpritesByName[headimages[i]], rect, null, Color.White);
+                int spritesize = headimages[i].Radius;
+                Rectangle rect = new Rectangle(headimages[i].X, headimages[i].Y, spritesize, spritesize);
+                Graphics.Current.SpriteB.Draw(Graphics.Current.SpritesByName[headimages[i].SpriteName], rect, null, Color.White);
             }
             Graphics.Current.SpriteB.End();
         }
