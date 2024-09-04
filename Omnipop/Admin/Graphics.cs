@@ -126,5 +126,24 @@ namespace HPScreen.Admin
                 Graphics.Current.SpriteB.End();
             }
         }
+
+        public Rectangle GetBoundaryRect()
+        {
+            return new Rectangle(
+                GetBoundaryLeft(), 
+                GetBoundaryTop(), 
+                GetBoundaryRight() - GetBoundaryLeft(),
+                GetBoundaryBottom() - GetBoundaryTop());
+        }
+        public int GetBoundaryLeft() { return 100; } 
+        public int GetBoundaryRight() { return Current.ScreenWidth - 100; }
+        public int GetBoundaryTop() { return 100; }
+        public int GetBoundaryBottom() { return 500; }
+        public int GetBoundaryCenterX() { return (Current.GetBoundaryLeft() + Current.GetBoundaryRight()) / 2; }
+        public int GetBoundaryCenterY() { return (Current.GetBoundaryTop() + Current.GetBoundaryBottom()) / 2; }
+        public bool PositionOutsideBoundary(int x, int y)
+        {
+            return (x < GetBoundaryLeft() || x > GetBoundaryRight() || y < GetBoundaryTop() || y > GetBoundaryBottom());
+        }
     }
 }
