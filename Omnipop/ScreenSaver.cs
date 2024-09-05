@@ -211,9 +211,9 @@ namespace HPScreen
             {
                 int spritesize = Heads[i].Radius*2;
                 Rectangle rect = new Rectangle(Heads[i].X - Heads[i].Radius, Heads[i].Y - Heads[i].Radius, spritesize, spritesize);
-                Graphics.Current.SpriteB.Draw(Graphics.Current.SpritesByName[Heads[i].SpriteName], rect, null, Color.White);
+                Graphics.Current.SpriteB.Draw(Graphics.Current.SpritesByName[Heads[i].SpriteName], rect, null, Heads[i].GetHighlightColor());
 
-                Heads[i].Collider.Draw(Color.Red);
+                //Heads[i].Collider.Draw(Color.Red);
             }
             Graphics.Current.SpriteB.End();
         }

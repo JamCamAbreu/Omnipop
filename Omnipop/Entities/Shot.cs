@@ -1,6 +1,7 @@
 ﻿using HPScreen;
 using HPScreen.Admin;
 using Microsoft.Xna.Framework;
+using MonoGame.Extended;
 using Omnipop.Admin;
 using System;
 using System.Collections.Generic;
@@ -21,6 +22,15 @@ namespace Omnipop.Entities
         public Vector2 CenterPos { get { return new Vector2(X, Y); } }
         public CircleCollision Collider { get; set; }
         public bool IsDead { get; set; }
+        public int MaxHealth { get; set; }
+        public int Health { get; set; }
+        public float TravelingSpeed 
+        { 
+            get
+            {
+                return (float)Math.Sqrt(XVelocity * XVelocity + YVelocity * YVelocity);
+            } 
+        }
 
         public Shot()
         {
@@ -30,6 +40,8 @@ namespace Omnipop.Entities
             XVelocity = 0;
             YVelocity = 0;
             IsDead = false;
+            MaxHealth = 100;
+            Health = MaxHealth;
         }
         public void SetPosition(int x, int y)
         {
@@ -56,6 +68,14 @@ namespace Omnipop.Entities
 
             CalculateEntityBoundaries();
             CheckHeadCollisions();
+            if (Health < 0)
+            {
+                IsDead = true;
+            }
+        }
+        public Color GetHighlightColor()
+        {
+            return Color.Lerp(Color.White, Color.Red, 1 - (float)Health / MaxHealth);
         }
 
         public void Draw()
@@ -63,9 +83,9 @@ namespace Omnipop.Entities
             Vector2 drawpos = new Vector2(X - RADIUS, Y - RADIUS);
 
             Graphics.Current.SpriteB.Begin();
-            Graphics.Current.SpriteB.Draw(Graphics.Current.SpritesByName["ball"], drawpos, null, Color.White, 0, Vector2.Zero, 1.0f, Microsoft.Xna.Framework.Graphics.SpriteEffects.None, 0);
+            Graphics.Current.SpriteB.Draw(Graphics.Current.SpritesByName["ball"], drawpos, null, GetHighlightColor(), 0, Vector2.Zero, 1.0f, Microsoft.Xna.Framework.Graphics.SpriteEffects.None, 0);
 
-            Collider.Draw(Color.Red);
+            //Collider.Draw(Color.Red);
 
             Graphics.Current.SpriteB.End();
 
@@ -92,8 +112,18 @@ namespace Omnipop.Entities
             {
                 if (Collider.IsCollision(h.Collider))
                 {
-                    h.IsDead = true;
-                    //IsDead = true;
+                    // Apply damage
+                    int damage = (int)(TravelingSpeed * 2);
+                    h.Health -= damage;
+                    Health -= damage;
+
+                    // reflect the shot depending on where it hits the head
+                    Vector2 curVelocity = new Vector2(XVelocity, YVelocity);
+                    Vector2 pushvect = Global.GetVectorBetweenTwoPoints(X, Y, h.X, h.Y);
+                    Vector2 normal = pushvect.NormalizedCopy();
+                    Vector2 reflected = curVelocity - 2 * Vector2.Dot(curVelocity, normal) * normal;
+                    XVelocity = reflected.X;
+                    YVelocity = reflected.Y;
                 }
             }
         }

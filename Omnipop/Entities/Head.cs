@@ -25,6 +25,8 @@ namespace Omnipop.Entities
         public int Radius { get; protected set; }
         public CircleCollision Collider { get; set; }
         public bool IsDead { get; set; }
+        public int MaxHealth { get; set; }
+        public int Health { get; set; }
         public Head(string spriteName, int radius)
         {
             SpriteName = spriteName;
@@ -33,6 +35,8 @@ namespace Omnipop.Entities
             Y = 0;
             Collider = new CircleCollision(X, Y, radius);
             IsDead = false;
+            MaxHealth = 100;
+            Health = MaxHealth;
         }
         public void SetPosition(int x, int y)
         {
@@ -48,6 +52,11 @@ namespace Omnipop.Entities
             X += (int)XVelocity;
             Y += (int)YVelocity;
             Collider.UpdatePosition(X, Y);
+
+            if (Health <= 0)
+            {
+               IsDead = true;
+            }
         }
         public void AddSpeedX(float speed)
         {
@@ -104,6 +113,10 @@ namespace Omnipop.Entities
         {
             XVelocity *= AIR_FRICTION;
             YVelocity *= AIR_FRICTION;
+        }
+        public Color GetHighlightColor()
+        {
+            return Color.Lerp(Color.White, Color.Red, 1 - (float)Health / MaxHealth);
         }
 
     }
