@@ -24,6 +24,7 @@ namespace Omnipop.Entities
         public Vector2 CenterPos { get { return new Vector2(X, Y); } }
         public int Radius { get; protected set; }
         public CircleCollision Collider { get; set; }
+        public bool IsDead { get; set; }
         public Head(string spriteName, int radius)
         {
             SpriteName = spriteName;
@@ -31,21 +32,22 @@ namespace Omnipop.Entities
             X = 0;
             Y = 0;
             Collider = new CircleCollision(X, Y, radius);
+            IsDead = false;
         }
         public void SetPosition(int x, int y)
         {
             X = x;
             Y = y;
-            Collider.UpdatePosition(x + Radius, y + Radius);
+            Collider.UpdatePosition(x, y);
         }
         public void Update()
         {
-            CalculateEntityBoundaries(ScreenSaver.headimages);
+            CalculateEntityBoundaries(ScreenSaver.Heads);
             ApplyAirFriction();
 
             X += (int)XVelocity;
             Y += (int)YVelocity;
-            Collider.UpdatePosition(X + Radius, Y + Radius);
+            Collider.UpdatePosition(X, Y);
         }
         public void AddSpeedX(float speed)
         {

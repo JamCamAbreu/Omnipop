@@ -11,6 +11,7 @@ using SharpDX.Direct2D1;
 using SharpDX.Direct3D9;
 using System;
 using System.Collections.Generic;
+using System.Xml.Linq;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using Effect = Microsoft.Xna.Framework.Graphics.Effect;
 
@@ -26,9 +27,10 @@ namespace HPScreen
         private int loadFrames = 0;
         private const int LOAD_FRAMES_THRESH = 10;
         Effect circleCropEffect;
-        public static List<Head> headimages = new List<Head>();
-        protected List<string> names = new List<string>();
-        public List<ICollision> colliders = new List<ICollision>();
+
+        public static List<Head> Heads { get; set; } = new List<Head>();
+        protected List<string> HeadNames { get; set; } = new List<string>();
+        public Turret GameTurret { get; set; }
 
         protected bool RunSetup { get; set; }
         public ScreenSaver()
@@ -52,49 +54,54 @@ namespace HPScreen
         protected override void LoadContent()
         {
             Graphics.Current.SpriteB = new Microsoft.Xna.Framework.Graphics.SpriteBatch(Graphics.Current.GraphicsDM.GraphicsDevice);
-            names.Add("aaron");
-            names.Add("acole");
-            names.Add("aj");
-            names.Add("alej");
-            names.Add("allison");
-            names.Add("brett");
-            names.Add("brian");
-            names.Add("cam");
-            names.Add("chad");
-            names.Add("chris");
-            names.Add("dakota");
-            names.Add("dalton");
-            names.Add("daryl");
-            names.Add("denise");
-            names.Add("dustin");
-            names.Add("dusty");
-            names.Add("emily");
-            names.Add("isaac");
-            names.Add("jack");
-            names.Add("jacob");
-            names.Add("jackadam");
-            names.Add("jeff");
-            names.Add("john");
-            names.Add("jonah");
-            names.Add("josh");
-            names.Add("jpaul");
-            names.Add("juan");
-            names.Add("katelyn");
-            names.Add("keegan");
-            names.Add("keiran");
-            names.Add("kenny");
-            names.Add("kevin");
-            names.Add("mary");
-            names.Add("max");
-            names.Add("michael");
-            names.Add("nicole");
-            names.Add("noah");
-            names.Add("philip");
-            names.Add("ryan");
-            names.Add("sharvil");
-            names.Add("tim");
 
-            foreach (string name in names)
+            Graphics.Current.SpritesByName.Add("turret", Content.Load<Texture2D>($"Sprites/misc/Turret"));
+            Graphics.Current.SpritesByName.Add("turretbarrel", Content.Load<Texture2D>($"Sprites/misc/TurretBarrel"));
+            Graphics.Current.SpritesByName.Add("ball", Content.Load<Texture2D>($"Sprites/misc/Ball"));
+
+            HeadNames.Add("aaron");
+            HeadNames.Add("acole");
+            HeadNames.Add("aj");
+            HeadNames.Add("alej");
+            HeadNames.Add("allison");
+            HeadNames.Add("brett");
+            HeadNames.Add("brian");
+            HeadNames.Add("cam");
+            HeadNames.Add("chad");
+            HeadNames.Add("chris");
+            HeadNames.Add("dakota");
+            HeadNames.Add("dalton");
+            HeadNames.Add("daryl");
+            HeadNames.Add("denise");
+            HeadNames.Add("dustin");
+            HeadNames.Add("dusty");
+            HeadNames.Add("emily");
+            HeadNames.Add("isaac");
+            HeadNames.Add("jack");
+            HeadNames.Add("jacob");
+            HeadNames.Add("jackadam");
+            HeadNames.Add("jeff");
+            HeadNames.Add("john");
+            HeadNames.Add("jonah");
+            HeadNames.Add("josh");
+            HeadNames.Add("jpaul");
+            HeadNames.Add("juan");
+            HeadNames.Add("katelyn");
+            HeadNames.Add("keegan");
+            HeadNames.Add("keiran");
+            HeadNames.Add("kenny");
+            HeadNames.Add("kevin");
+            HeadNames.Add("mary");
+            HeadNames.Add("max");
+            HeadNames.Add("michael");
+            HeadNames.Add("nicole");
+            HeadNames.Add("noah");
+            HeadNames.Add("philip");
+            HeadNames.Add("ryan");
+            HeadNames.Add("sharvil");
+            HeadNames.Add("tim");
+
+            foreach (string name in HeadNames)
             {
                 Graphics.Current.SpritesByName.Add(name, Content.Load<Texture2D>($"Sprites/{name}"));
             }
@@ -113,10 +120,13 @@ namespace HPScreen
             CheckInput(); // Used to exit game when input detected (aka screensaver logic)
             if (RunSetup) { Setup(); }
 
-            foreach (Head head in headimages)
+            foreach (Head head in Heads)
             {
                 head.Update();
             }
+            CleanUpDeadHeads();
+
+            GameTurret.Update();
 
             base.Update(gameTime);
         }
@@ -128,27 +138,30 @@ namespace HPScreen
             DrawBackground();
             DrawHeadBoundaries();
             DrawHeads();
+            GameTurret.Draw();
 
             base.Draw(gameTime);
         }
 
         protected void Setup()
         {
-            List<string> namelist = new List<string>(names);
+            List<string> namelist = new List<string>(HeadNames);
             for (int i = 0; i < 16; i++)
             {
                 int size = Ran.Current.Next(90, 140);
                 int index = Ran.Current.Next(0, namelist.Count - 1);
-                headimages.Add(new Head(namelist[index], size));
+                Heads.Add(new Head(namelist[index], size));
                 namelist.RemoveAt(index);
             }
 
-            foreach (Head head in headimages)
+            foreach (Head head in Heads)
             {
                 head.SetPosition(
                     Ran.Current.Next(100, Graphics.Current.ScreenWidth - 100),
                     Ran.Current.Next(100, 400));
             }
+
+            GameTurret = new Turret();
 
             RunSetup = false;
         }
@@ -194,13 +207,13 @@ namespace HPScreen
         protected void DrawHeads()
         {
             Graphics.Current.SpriteB.Begin(effect: circleCropEffect);
-            for (int i = 0; i < headimages.Count; i++)
+            for (int i = 0; i < Heads.Count; i++)
             {
-                int spritesize = headimages[i].Radius*2;
-                Rectangle rect = new Rectangle(headimages[i].X - headimages[i].Radius, headimages[i].Y - headimages[i].Radius, spritesize, spritesize);
-                Graphics.Current.SpriteB.Draw(Graphics.Current.SpritesByName[headimages[i].SpriteName], rect, null, Color.White);
+                int spritesize = Heads[i].Radius*2;
+                Rectangle rect = new Rectangle(Heads[i].X - Heads[i].Radius, Heads[i].Y - Heads[i].Radius, spritesize, spritesize);
+                Graphics.Current.SpriteB.Draw(Graphics.Current.SpritesByName[Heads[i].SpriteName], rect, null, Color.White);
 
-                //headimages[i].Collider.Draw(Color.Red);
+                Heads[i].Collider.Draw(Color.Red);
             }
             Graphics.Current.SpriteB.End();
         }
@@ -210,8 +223,21 @@ namespace HPScreen
             Rectangle rect = Graphics.Current.GetBoundaryRect();
             Graphics.Current.SpriteB.DrawRectangle(rect, Color.Red);
             Graphics.Current.SpriteB.End();
-
-
+        }
+        public void CleanUpDeadHeads()
+        {
+            List<Head> deadheads = new List<Head>();
+            foreach (Head head in Heads)
+            {
+                if (head.IsDead)
+                {
+                    deadheads.Add(head);
+                }
+            }
+            foreach (Head head in deadheads)
+            {
+                Heads.Remove(head);
+            }
         }
     }
 }

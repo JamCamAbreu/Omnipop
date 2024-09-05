@@ -9,8 +9,8 @@ namespace Omnipop.Admin
 {
     public interface ICollision
     {
-        public int CenterX { get; set; }
-        public int CenterY { get; set; }
+        public int X { get; set; }
+        public int Y { get; set; }
         public bool IsCollision(int x, int y);
         public void UpdatePosition(int x, int y);
         public void Draw(Color? drawColor);

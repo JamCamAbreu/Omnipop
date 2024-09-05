@@ -12,25 +12,25 @@ namespace Omnipop.Admin
 {
     public class RectangleCollision : ICollision
     {
-        public int CenterX { get; set; }
-        public int CenterY { get; set; }
+        public int X { get; set; }
+        public int Y { get; set; }
         public int Width { get; set; }
         public int Height { get; set; }
-        public int LeftX { get { return CenterX - Width / 2; } }
-        public int RightX { get { return CenterX + Width / 2; } }
-        public int TopY { get { return CenterY - Height / 2; } }
-        public int BottomY { get { return CenterY + Height / 2; } }
+        public int LeftX { get { return X - Width / 2; } }
+        public int RightX { get { return X + Width / 2; } }
+        public int TopY { get { return Y - Height / 2; } }
+        public int BottomY { get { return Y + Height / 2; } }
         public RectangleCollision(int centerX, int centerY, int width, int height)
         {
-            CenterX = centerX;
-            CenterY = centerY;
+            X = centerX;
+            Y = centerY;
             Width = width;
             Height = height;
         }
         public bool IsCollision(int x, int y)
         {
-            if (x >= CenterX - Width / 2 && x <= CenterX + Width / 2 &&
-                y >= CenterY - Height / 2 && y <= CenterY + Height / 2)
+            if (x >= X - Width / 2 && x <= X + Width / 2 &&
+                y >= Y - Height / 2 && y <= Y + Height / 2)
             {
                 return true;
             }
@@ -47,12 +47,12 @@ namespace Omnipop.Admin
         public bool IsCollision(CircleCollision collider)
         {
             // Find the closest point on the rectangle to the center of the circle
-            float closestX = Clamp(collider.CenterX, this.CenterX - this.Width / 2, this.CenterX + this.Width / 2);
-            float closestY = Clamp(collider.CenterY, this.CenterY - this.Height / 2, this.CenterY + this.Height / 2);
+            float closestX = Clamp(collider.X, this.X - this.Width / 2, this.X + this.Width / 2);
+            float closestY = Clamp(collider.Y, this.Y - this.Height / 2, this.Y + this.Height / 2);
 
             // Calculate the distance between the collider's center and the closest point on the rectangle
-            float distanceX = collider.CenterX - closestX;
-            float distanceY = collider.CenterY - closestY;
+            float distanceX = collider.X - closestX;
+            float distanceY = collider.Y - closestY;
 
             // Check if the distance is less than or equal to the collider's radius
             return (distanceX * distanceX + distanceY * distanceY) <= (collider.Radius * collider.Radius);
@@ -60,13 +60,13 @@ namespace Omnipop.Admin
         }
         public void Draw(Color? drawColor = null)
         {
-            Graphics.Current.SpriteB.DrawRectangle((float)this.CenterX - this.Width / 2, (float)this.CenterY - this.Height / 2, (float)this.Width, (float)this.Height, drawColor == null ? Color.Red : (Color)drawColor);
+            Graphics.Current.SpriteB.DrawRectangle((float)this.X - this.Width / 2, (float)this.Y - this.Height / 2, (float)this.Width, (float)this.Height, drawColor == null ? Color.Red : (Color)drawColor);
         }
 
         public void UpdatePosition(int x, int y)
         {
-            this.CenterX = x;
-            this.CenterY = y;
+            this.X = x;
+            this.Y = y;
         }
 
         static float Clamp(float value, float min, float max)
