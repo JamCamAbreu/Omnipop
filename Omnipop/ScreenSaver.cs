@@ -8,7 +8,6 @@ using MonoGame.Extended;
 using Omnipop.Admin;
 using Omnipop.Entities;
 using SharpDX.Direct2D1;
-using SharpDX.Direct3D9;
 using System;
 using System.Collections.Generic;
 using System.Xml.Linq;
@@ -27,10 +26,12 @@ namespace HPScreen
         private int loadFrames = 0;
         private const int LOAD_FRAMES_THRESH = 10;
         Effect circleCropEffect;
-
+        public static Font SmallWhite = new Font(Color.White, Font.Type.arial, Font.Size.SIZE_S, false);
+        public static Font MediumGold = new Font(Color.Gold, Font.Type.arial, Font.Size.SIZE_M, false);
         public static List<Head> Heads { get; set; } = new List<Head>();
         protected List<string> HeadNames { get; set; } = new List<string>();
         public Turret GameTurret { get; set; }
+        public Showcase showcase { get; set; }
 
         protected bool RunSetup { get; set; }
         public ScreenSaver()
@@ -127,6 +128,12 @@ namespace HPScreen
             CleanUpDeadHeads();
 
             GameTurret.Update();
+            showcase.Update();
+
+            if (showcase.LastHeadShowcaseComplete)
+            {
+                Setup();
+            }
 
             base.Update(gameTime);
         }
@@ -136,9 +143,10 @@ namespace HPScreen
             Graphics.Current.Device.Clear(Color.Black);
 
             DrawBackground();
-            DrawHeadBoundaries();
+            //DrawHeadBoundaries();
             DrawHeads();
             GameTurret.Draw();
+            showcase.Draw();
 
             base.Draw(gameTime);
         }
@@ -146,7 +154,7 @@ namespace HPScreen
         protected void Setup()
         {
             List<string> namelist = new List<string>(HeadNames);
-            for (int i = 0; i < 16; i++)
+            for (int i = 0; i < 9; i++)
             {
                 int size = Ran.Current.Next(90, 140);
                 int index = Ran.Current.Next(0, namelist.Count - 1);
@@ -157,11 +165,12 @@ namespace HPScreen
             foreach (Head head in Heads)
             {
                 head.SetPosition(
-                    Ran.Current.Next(100, Graphics.Current.ScreenWidth - 100),
-                    Ran.Current.Next(100, 400));
+                    Graphics.Current.GetBoundaryCenterX() + Ran.Current.Next(-100, 100),
+                    Graphics.Current.GetBoundaryCenterY() + Ran.Current.Next(-100, 100));
             }
 
             GameTurret = new Turret();
+            showcase = new Showcase();
 
             RunSetup = false;
         }
@@ -236,7 +245,14 @@ namespace HPScreen
             }
             foreach (Head head in deadheads)
             {
+                showcase.AddHead(head);
                 Heads.Remove(head);
+            }
+
+            if (Heads.Count == 1)
+            {
+                showcase.SetLastHead(Heads[0]);
+                Heads.Clear();
             }
         }
     }

@@ -13,7 +13,8 @@ namespace Omnipop.Entities
 {
     public class Shot
     {
-        public const float MAX_VELOCITY = 10;
+        public const float MIN_VELOCITY = 7;
+        public const float MAX_VELOCITY = 14;
         public const int RADIUS = 16;
         public int X { get; set; }
         public int Y { get; set; }
@@ -40,7 +41,7 @@ namespace Omnipop.Entities
             XVelocity = 0;
             YVelocity = 0;
             IsDead = false;
-            MaxHealth = 100;
+            MaxHealth = Ran.Current.Next(5, 60);
             Health = MaxHealth;
         }
         public void SetPosition(int x, int y)
@@ -98,11 +99,13 @@ namespace Omnipop.Entities
                 if (X < Graphics.Current.GetBoundaryLeft() || X > Graphics.Current.GetBoundaryRight())
                 {
                     XVelocity = -XVelocity;
+                    Health -= 9;
                 }
 
-                if (Y < -100 || Y > Graphics.Current.ScreenHeight + 100)
+                if (Y <= 0 || Y >= Graphics.Current.ScreenHeight)
                 {
-                    IsDead = true;
+                    YVelocity = -YVelocity;
+                    Health -= 9;
                 }
             }
         }
@@ -124,6 +127,9 @@ namespace Omnipop.Entities
                     Vector2 reflected = curVelocity - 2 * Vector2.Dot(curVelocity, normal) * normal;
                     XVelocity = reflected.X;
                     YVelocity = reflected.Y;
+
+                    h.XVelocity = -XVelocity;
+                    h.YVelocity = -YVelocity;
                 }
             }
         }

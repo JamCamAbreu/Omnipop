@@ -19,7 +19,7 @@ namespace Omnipop.Entities
             Rotation = 0;
             TargetRotation = 0;
             TimerMin = 40;
-            TimerMax = 180;
+            TimerMax = 80;
             ResetTimer();
             ResetRotation();
             X = Graphics.Current.ScreenMidX;
@@ -40,9 +40,11 @@ namespace Omnipop.Entities
 
             Shot shot = new Shot();
             shot.SetPosition((int)bulletX, (int)bulletY);
-            
-            shot.AddSpeedX((float)Math.Cos(Rotation) * Shot.MAX_VELOCITY);
-            shot.AddSpeedY((float)Math.Sin(Rotation) * Shot.MAX_VELOCITY);
+
+            float velocity = Ran.Current.Next(Shot.MIN_VELOCITY, Shot.MAX_VELOCITY);
+
+            shot.AddSpeedX((float)Math.Cos(Rotation) * velocity);
+            shot.AddSpeedY((float)Math.Sin(Rotation) * velocity);
             Shots.Add(shot);
         }
         public int Timer { get; set; }
